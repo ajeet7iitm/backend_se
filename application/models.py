@@ -9,6 +9,8 @@ Base = declarative_base()
 db = SQLAlchemy()
 from datetime import datetime
 
+
+
 class User(db.Model):
     __tablename__='user'
     user_id=db.Column(db.Integer,primary_key=True,autoincrement=True)
@@ -69,7 +71,7 @@ def token_required(function):
 		
 		# except:
 		# 	return jsonify({"status":'unsuccessful, missing the authtoken'})
-		auth_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo5LCJleHAiOjE3MTA4MDQ4MDB9.1loIWYuDXodv9lf3P9QcXF1DeL-lJNzp5GdQZ5BuqCY"
+		auth_token =local_token
 		try: 
 			output = jwt.decode(auth_token,Config.SECRET_KEY,algorithms=["HS256"])
 			#print(output)
@@ -79,3 +81,4 @@ def token_required(function):
 		
 		return function(user,*args,**kwargs)
 	return loggedin
+

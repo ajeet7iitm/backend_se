@@ -4,7 +4,8 @@ from flask import jsonify
 from datetime import datetime
 from dateutil import tz, parser
 from application.models import User, Response, Ticket, FAQ, Category, Flagged_Post
-from application.models import token_required, db
+from application.models import db
+from application.routes import token_required
 from application.workers import celery
 from celery import chain
 from application.tasks import send_email, response_notification
@@ -14,33 +15,11 @@ from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
 
-class Get_Duser(Resource):
-    def post(self):
-        if request.is_json:
-            email = request.json["email"]
-            password = request.json["password"]
-        else:
-            email = request.form["email"]
-            password = request.form["password"]
-        test = User.query.filter_by(email_id=email).first()
-        # print(test)
-        if (test is None):
-            abort(409,message="User does not exist")
-        elif (test.password == password):
-            token = jwt.encode({
-                'user_id': test.user_id,
-                'exp': datetime.utcnow() + timedelta(minutes=80)
-            }, Config.SECRET_KEY, algorithm="HS256")
-            # access_token = create_access_token(identity=email)
-            # print(token)
-            return jsonify({"message":"Login Succeeded!", "token":token,"user_id":test.user_id,"role":test.role_id})
-        else:
-            abort(401, message="Bad Email or Password")
-            
+
 class Sitaram(Resource): 
        @token_required
        def get(user,self):
-           x=requests.get("http://localhost:4200/u/21f1000907.json")  
+           x=requests.get("http://localhost:4200/u/005ajeet.json")  
            return x.json()
 
 class Discourse_post(Resource):

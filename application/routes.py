@@ -8,7 +8,7 @@ from flask import jsonify
 from datetime import datetime
 from dateutil import tz, parser
 from application.models import User, Response, Ticket, FAQ, Category, Flagged_Post
-from application.models import token_required, db
+from application.models import  db
 from application.workers import celery
 from celery import chain
 from application.tasks import send_email, response_notification
@@ -18,9 +18,10 @@ from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
 
-
+local_token=""
 @app.route("/")
 def home():
+    print(local_token)
     return 'hi'
 
 @app.route("/sitaram", methods=["GET", "POST"])
@@ -42,9 +43,32 @@ def post1():
         }, Config.SECRET_KEY, algorithm="HS256")
         # access_token = create_access_token(identity=email)
         # print(token)
+        global local_token
+        local_token=token
+        print(local_token)
         return jsonify({"message":"Login Succeeded!", "token":token,"user_id":test.user_id,"role":test.role_id})
     else:
         abort(401, message="Bad Email or Password")
+
+def token_required(function):
+	@functools.wraps(function)
+	def loggedin(*args,**kwargs):
+		auth_token=None
+		# try:
+		# 	auth_token = request.headers['secret_authtoken']
+		
+		# except:
+		# 	return jsonify({"status":'unsuccessful, missing the authtoken'})
+		auth_token =local_token
+		try: 
+			output = jwt.decode(auth_token,Config.SECRET_KEY,algorithms=["HS256"])
+			#print(output)
+			user = User.query.filter_by(user_id = output["user_id"]).first()
+		except:
+			return jsonify({"status":"failure, your token details do not match"})
+		
+		return function(user,*args,**kwargs)
+	return loggedin
 
 @app.route("/users", methods=["GET"])
 @token_required

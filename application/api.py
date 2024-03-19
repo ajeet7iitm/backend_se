@@ -3,7 +3,8 @@ from flask import jsonify
 from datetime import datetime
 from dateutil import tz, parser
 from application.models import User, Response, Ticket, FAQ, Category, Flagged_Post
-from application.models import token_required, db
+from application.models import  db
+from application.routes import token_required
 from application.workers import celery
 from celery import chain
 from application.tasks import send_email, response_notification
